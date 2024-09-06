@@ -1,0 +1,53 @@
+import cv2
+import numpy as np
+import tkinter as tk
+from tkinter import filedialog
+
+# Function to detect Gaussian noise
+def detect_gaussian_noise(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    difference = cv2.absdiff(gray, blur)
+    mean_difference = np.mean(difference)
+    return mean_difference
+
+# Function to remove Gaussian noise
+def remove_gaussian_noise(image):
+    blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
+    return blurred_image
+
+# Function to open file dialog and select image
+def open_file():
+    filename = filedialog.askopenfilename()
+    if filename:
+        # Read the image
+        image = cv2.imread(filename)
+        # Detect Gaussian noise
+        noise_level = detect_gaussian_noise(image)
+        if noise_level > 10:
+            noise_status.set("Gaussian noise detected. Removing noise...")
+            # Remove Gaussian noise
+            processed_image = remove_gaussian_noise(image)
+            # Display original and processed images
+            cv2.imshow("Original Image", image)
+            cv2.imshow("Processed Image", processed_image)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+        else:
+            noise_status.set("No Gaussian noise detected.")
+
+# Create GUI window
+root = tk.Tk()
+root.title("Gaussian Noise Detection and Removal")
+
+# Create button to open file dialog
+open_button = tk.Button(root, height= 2, width=30 , text="Open Image", command=open_file)
+open_button.pack()
+
+# Create label for noise status
+noise_status = tk.StringVar()
+noise_status_label = tk.Label(root, height=10 , width=50 , textvariable=noise_status)
+noise_status_label.pack()
+
+# Run GUI
+root.mainloop()
